@@ -1,4 +1,4 @@
-# Farmly (formerly KisanSahayak)
+# Farmly (formerly SHRI BUILD)
 
 **Farmly** is a smart, data-driven web application designed to help farmers make informed decisions. By integrating machine learning, environmental data, advanced imaging techniques, and innovative marketplace features, we aim to provide farmers with real-time insights into rainfall patterns, crop recommendations, disease management, and more.
 
