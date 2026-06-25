@@ -37,6 +37,19 @@ final validationResultProvider = StateProvider<ValidationResult?>((ref) => null)
 
 enum ScanMode { quick, advanced }
 
+// ─── Detection V2 (New Workflow) ───────────────────────
+final newDetectionServiceProvider = Provider<NewDetectionService>((ref) {
+  final authService = ref.read(authServiceProvider);
+  return NewDetectionService(authService: authService);
+});
+
+final leafDetectionResultProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
+final advisoryResultProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
+final isAdvisoryLoadingProvider = StateProvider<bool>((ref) => false);
+final selectedLanguageProvider = StateProvider<String>((ref) => 'English');
+final detectionStepProvider = StateProvider<int>((ref) => 0);
+
+
 // ─── Locale / Language ─────────────────────────────────
 final localeProvider = StateProvider<Locale>((ref) => const Locale('en'));
 

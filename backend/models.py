@@ -8,7 +8,8 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    mobile_number = Column(String(15), unique=True, index=True, nullable=False)
+    mobile_number = Column(String(15), unique=True, index=True, nullable=True)
+    email = Column(String(100), unique=True, index=True, nullable=True)
     name = Column(String(100), default="")
     location = Column(String(200), default="Maharashtra")
     preferred_language = Column(String(5), default="mr")  # mr, hi, en

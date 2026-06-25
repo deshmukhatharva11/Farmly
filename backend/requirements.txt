@@ -2,6 +2,7 @@
 fastapi==0.115.12
 uvicorn[standard]==0.34.2
 sqlalchemy==2.0.41
+psycopg2-binary==2.9.9
 pydantic==2.11.3
 pydantic-settings==2.9.1
 python-jose[cryptography]==3.5.0
@@ -13,7 +14,10 @@ httpx
 
 # AI / ML
 ultralytics
+huggingface-hub
+torch
 openai
 Pillow
 numpy
 opencv-python-headless
+google-genai

@@ -53,17 +53,7 @@ class HomeScreen extends ConsumerWidget {
             ]).animate().fadeIn(duration: 400.ms),
             const SizedBox(height: 24),
 
-            // Quick actions
-            Row(children: [
-              _QuickAction(icon: Icons.camera_alt_rounded, label: l10n.translate('scan'), color: AppColors.primary, onTap: () => Navigator.pushNamed(context, '/scan'), delay: 100),
-              const SizedBox(width: 12),
-              _QuickAction(icon: Icons.wb_sunny_rounded, label: l10n.translate('weather'), color: AppColors.tertiary, onTap: () => Navigator.pushNamed(context, '/weather-dashboard'), delay: 200),
-              const SizedBox(width: 12),
-              _QuickAction(icon: Icons.history_rounded, label: l10n.translate('history'), color: AppColors.secondary, onTap: () => Navigator.pushNamed(context, '/history'), delay: 300),
-              const SizedBox(width: 12),
-              _QuickAction(icon: Icons.people_rounded, label: l10n.translate('community'), color: const Color(0xFF7B61FF), onTap: () {}, delay: 400),
-            ]),
-            const SizedBox(height: 28),
+
 
             // Scan hero button
             Center(child: GestureDetector(

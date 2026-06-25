@@ -71,8 +71,8 @@ def list_posts(
         result.append(PostResponse(
             id=post.id,
             user_id=post.user_id,
-            user_name=user.name if user else "",
-            user_location=user.location if user else "",
+            user_name=(user.name if user and user.name else "Farmer"),
+            user_location=(user.location if user and user.location else "Unknown"),
             content=post.content,
             crop_type=post.crop_type,
             image_url=post.image_url,
@@ -105,8 +105,8 @@ def create_post(
     return PostResponse(
         id=post.id,
         user_id=post.user_id,
-        user_name=user.name if user else "",
-        user_location=user.location if user else "",
+        user_name=(user.name if user and user.name else "Farmer"),
+        user_location=(user.location if user and user.location else "Unknown"),
         content=post.content,
         crop_type=post.crop_type,
         image_url=post.image_url,

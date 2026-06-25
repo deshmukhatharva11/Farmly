@@ -1,0 +1,46 @@
+names:
+- apple black rot
+- apple healthy
+- apple scab
+- bell pepper bacterial spot
+- bell pepper healthy
+- cassava Brown Streak Disease
+- cassava bacterial blight
+- cassava green mottle
+- cedar apple rust
+- cherry healthy
+- cherry powdery mildew
+- corn cerespora leaf spot
+- corn common rust
+- corn healthy
+- grape black rot
+- grape esca
+- grape healthy
+- grape leaf blight
+- healthy cassava
+- mosaic  cassava
+- northern leaf blight
+- orange citrus greening
+- peach bacterial spot
+- peach healthy
+- potato early blight
+- potato healthy
+- potato late blight
+- rice brown spot
+- rice healthy
+- rice hispa
+- rice leaf blast
+- spider mites two-spotted spider mite
+- squash powdery mildew
+- strawberry healthy
+- strawberry leaf scorch
+- tomato bacterial spot
+- tomato early blight
+- tomato late blight
+- tomato leaf healthy
+- tomato leaf mould
+- tomato septoria leaf spot
+nc: 41
+test: D:/Projects/Farmly/backend/plant_disease_detection/test/images
+train: D:/Projects/Farmly/backend/plant_disease_detection/train/images
+val: D:/Projects/Farmly/backend/plant_disease_detection/valid/images

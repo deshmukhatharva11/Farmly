@@ -297,3 +297,170 @@ class MockDetectionService implements DetectionService {
     return detect(imagePaths.first);
   }
 }
+
+/// New V2 detection service for the improved single-image workflow.
+/// Calls /api/detect-leaf-and-disease, /api/generate-advisory, /api/translate-advisory
+class NewDetectionService {
+  final AuthService _authService;
+
+  NewDetectionService({required AuthService authService})
+      : _authService = authService;
+
+  Future<http.MultipartFile> _buildMultipartFile(String imagePath) async {
+    if (imagePath.startsWith('data:')) {
+      final base64Data = imagePath.split(',').last;
+      final bytes = base64Decode(base64Data);
+      return http.MultipartFile.fromBytes(
+        'image', bytes,
+        filename: 'scan.jpg',
+        contentType: MediaType('image', 'jpeg'),
+      );
+    } else {
+      try {
+        return await http.MultipartFile.fromPath(
+          'image', imagePath,
+          contentType: MediaType('image', 'jpeg'),
+        );
+      } catch (e) {
+        final imageResponse = await http.get(Uri.parse(imagePath));
+        if (imageResponse.statusCode == 200) {
+          return http.MultipartFile.fromBytes(
+            'image', imageResponse.bodyBytes,
+            filename: 'scan.jpg',
+            contentType: MediaType('image', 'jpeg'),
+          );
+        }
+        throw Exception('Failed to read image file');
+      }
+    }
+  }
+
+  /// Run full detection pipeline: validate → YOLO leaf → crop → disease classify
+  Future<Map<String, dynamic>> detectLeafAndDisease(String imagePath) async {
+    final token = await _authService.getToken();
+    
+    // Attempt Primary API
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.detectLeafAndDisease}');
+      final request = http.MultipartRequest('POST', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      request.files.add(await _buildMultipartFile(imagePath));
+
+      final streamedResponse = await request
+          .send()
+          .timeout(Duration(seconds: ApiConfig.timeoutSeconds));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        print('[Farmly] Primary detection API failed with status ${response.statusCode}. Trying fallback...');
+      }
+    } catch (e) {
+      print('[Farmly] Primary detection API encountered an error: $e. Trying fallback...');
+    }
+    
+    // Attempt Fallback API
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.detectLeafAndDiseaseFallback}');
+      final request = http.MultipartRequest('POST', uri);
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      request.files.add(await _buildMultipartFile(imagePath));
+
+      final streamedResponse = await request
+          .send()
+          .timeout(Duration(seconds: ApiConfig.timeoutSeconds));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      throw Exception('Fallback Detection API returned status ${response.statusCode}');
+    } catch (e) {
+      if (e.toString().contains('TimeoutException')) {
+        throw Exception('Detection timed out. The server may be busy.');
+      }
+      rethrow;
+    }
+  }
+
+  /// Generate Gemini advisory (call only after status=success)
+  Future<Map<String, dynamic>> generateAdvisory({
+    required String crop,
+    required String disease,
+    required double confidence,
+    required String language,
+  }) async {
+    final token = await _authService.getToken();
+    final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.generateAdvisory}');
+
+    try {
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'crop': crop,
+              'disease': disease,
+              'confidence': confidence,
+              'language': language,
+            }),
+          )
+          .timeout(Duration(seconds: ApiConfig.timeoutSeconds));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      return {'_error': 'Advisory API returned status ${response.statusCode}'};
+    } catch (e) {
+      return {'_error': 'Advisory generation failed: $e'};
+    }
+  }
+
+  /// Translate an existing advisory to another language (no re-detection)
+  Future<Map<String, dynamic>> translateAdvisory({
+    required Map<String, dynamic> advisory,
+    required String language,
+  }) async {
+    final token = await _authService.getToken();
+    final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.translateAdvisory}');
+
+    try {
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'advisory': advisory,
+              'language': language,
+            }),
+          )
+          .timeout(Duration(seconds: ApiConfig.timeoutSeconds));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      return advisory; // Return original on failure
+    } catch (e) {
+      return advisory; // Return original on failure
+    }
+  }
+}
+

@@ -10,25 +10,51 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/scan/screens/scan_screen.dart';
 import 'features/scan/screens/processing_screen.dart';
 import 'features/result/screens/result_screen.dart';
+import 'features/result/screens/new_result_screen.dart';
 import 'features/disease/screens/disease_detail_screen.dart';
 import 'features/notifications/screens/notifications_screen.dart';
 import 'features/onboarding/screens/location_permission_screen.dart';
 import 'features/history/screens/history_screen.dart';
 import 'features/weather/screens/weather_dashboard_screen.dart';
 import 'app.dart';
+import 'services/auth_service.dart';
+
+import 'package:google_sign_in/google_sign_in.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Google Sign In for v7+
+  // clientId is used by web/iOS; serverClientId is Android-only (ID token exchange).
+  try {
+    const String googleClientId =
+        '988428256412-vqatag4is8gkocsvceneqtkdsennlsbt.apps.googleusercontent.com';
+
+    await GoogleSignIn.instance.initialize(
+      clientId: googleClientId,
+      serverClientId: kIsWeb ? null : googleClientId, // serverClientId not supported on Web
+    );
+    debugPrint('Google Sign In initialized successfully');
+  } catch (e) {
+    debugPrint('Google Sign In initialization error: $e');
+  }
+
   // Load persisted language before app starts
   final savedLocale = await loadPersistedLocale();
-  runApp(ProviderScope(
-    overrides: [localeProvider.overrideWith((ref) => savedLocale)],
-    child: const FarmlyApp(),
-  ));
+  final authService = AuthService();
+  final isLoggedIn = await authService.isLoggedIn();
+
+  runApp(
+    ProviderScope(
+      overrides: [localeProvider.overrideWith((ref) => savedLocale)],
+      child: FarmlyApp(isLoggedIn: isLoggedIn),
+    ),
+  );
 }
 
 class FarmlyApp extends ConsumerWidget {
-  const FarmlyApp({super.key});
+  final bool isLoggedIn;
+  const FarmlyApp({super.key, this.isLoggedIn = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,7 +72,7 @@ class FarmlyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: '/',
+      initialRoute: isLoggedIn ? '/home' : '/',
       onGenerateRoute: (settings) {
         Widget page;
         switch (settings.name) {
@@ -74,6 +100,9 @@ class FarmlyApp extends ConsumerWidget {
           case '/result':
             page = const ResultScreen();
             break;
+          case '/new-result':
+            page = const NewResultScreen();
+            break;
           case '/disease-detail':
             final diseaseName = settings.arguments as String? ?? 'Leaf Spot';
             page = DiseaseDetailScreen(diseaseName: diseaseName);
@@ -96,12 +125,18 @@ class FarmlyApp extends ConsumerWidget {
           pageBuilder: (context, animation, secondaryAnimation) => page,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
-              opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              ),
               child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.05, 0),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+                position:
+                    Tween<Offset>(
+                      begin: const Offset(0.05, 0),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                    ),
                 child: child,
               ),
             );

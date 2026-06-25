@@ -18,7 +18,25 @@ class HistoryScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.translate('scan_history'))),
       body: historyAsync.when(
         data: (scans) {
-          if (scans.isEmpty || (scans.length == 1 && scans.first.containsKey('error'))) {
+          if (scans.isEmpty) {
+            return _EmptyHistoryView(l10n: l10n);
+          }
+          if (scans.length == 1 && scans.first.containsKey('error')) {
+            if (scans.first['error'] == 'unauthorized') {
+              return Center(
+                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(Icons.lock_outline_rounded, size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.3)),
+                  const SizedBox(height: 16),
+                  Text('Please login to view your scan history', style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                    icon: const Icon(Icons.login),
+                    label: Text('Login'),
+                  ),
+                ]),
+              );
+            }
             return _EmptyHistoryView(l10n: l10n);
           }
           return ListView.builder(

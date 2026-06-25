@@ -63,3 +63,19 @@ ENV/
 .DS_Store
 Thumbs.db
 
+# ─── Farmly Production Secrets (NEVER commit these) ───────────────────────────
+android/key.properties
+android/upload-keystore.jks
+backend/.env
+
+# ─── Huge ML Training Datasets & Runs (exceeds GitHub 100MB limit) ────────────
+*.zip
+backend/plant_model/train/
+backend/plant_model/test/
+backend/plant_model/valid/
+backend/rice_model/RiceLeaf_Yolov8_Version/
+backend/runs/
+backend/rice_model/runs/
+backend/uploads/
+backend/outputs/
+

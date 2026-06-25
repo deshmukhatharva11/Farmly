@@ -28,10 +28,17 @@ class VerifyOTPResponse(BaseModel):
     is_new_user: bool = False
 
 
+class GoogleLoginRequest(BaseModel):
+    email: str
+    name: Optional[str] = ""
+    photo_url: Optional[str] = ""
+
+
 # ─── User Schemas ────────────────────────────────────────────
 class UserProfile(BaseModel):
     id: int
-    mobile_number: str
+    mobile_number: Optional[str]
+    email: Optional[str]
     name: str
     location: str
     preferred_language: str

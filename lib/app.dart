@@ -19,8 +19,8 @@ class AppShell extends ConsumerWidget {
 
     final screens = const [
       HomeScreen(),
-      SizedBox(), // Scan placeholder
       WeatherDashboardScreen(),
+      SizedBox(), // Scan placeholder
       CommunityScreen(),
       ProfileScreen(),
     ];
@@ -37,8 +37,8 @@ class AppShell extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
               _NavItem(icon: Icons.home_rounded, label: l10n.translate('home'), isSelected: currentIndex == 0, onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 0),
+              _NavItem(icon: Icons.wb_sunny_rounded, label: l10n.translate('weather'), isSelected: currentIndex == 1, onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 1),
               _NavItem(icon: Icons.camera_alt_rounded, label: l10n.translate('scan'), isSelected: false, isPrimary: true, onTap: () => Navigator.pushNamed(context, '/scan')),
-              _NavItem(icon: Icons.wb_sunny_rounded, label: l10n.translate('weather'), isSelected: currentIndex == 2, onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 2),
               _NavItem(icon: Icons.people_rounded, label: l10n.translate('community'), isSelected: currentIndex == 3, onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 3),
               _NavItem(icon: Icons.person_rounded, label: l10n.translate('profile'), isSelected: currentIndex == 4, onTap: () => ref.read(bottomNavIndexProvider.notifier).state = 4),
             ]),

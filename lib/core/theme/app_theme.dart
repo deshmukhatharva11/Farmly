@@ -29,73 +29,73 @@ class AppTheme {
         error: AppColors.error,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.manropeTextTheme().copyWith(
-        displayLarge: GoogleFonts.manrope(
+      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+        displayLarge: GoogleFonts.poppins(
           fontSize: 56,
           fontWeight: FontWeight.w700,
           color: AppColors.onSurface,
         ),
-        displayMedium: GoogleFonts.manrope(
+        displayMedium: GoogleFonts.poppins(
           fontSize: 45,
           fontWeight: FontWeight.w600,
           color: AppColors.onSurface,
         ),
-        headlineLarge: GoogleFonts.manrope(
+        headlineLarge: GoogleFonts.poppins(
           fontSize: 32,
           fontWeight: FontWeight.w700,
           color: AppColors.onSurface,
         ),
-        headlineMedium: GoogleFonts.manrope(
+        headlineMedium: GoogleFonts.poppins(
           fontSize: 28,
           fontWeight: FontWeight.w600,
           color: AppColors.onSurface,
         ),
-        headlineSmall: GoogleFonts.manrope(
+        headlineSmall: GoogleFonts.poppins(
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: AppColors.onSurface,
         ),
-        titleLarge: GoogleFonts.manrope(
+        titleLarge: GoogleFonts.poppins(
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: AppColors.onSurface,
         ),
-        titleMedium: GoogleFonts.publicSans(
+        titleMedium: GoogleFonts.poppins(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.onSurface,
         ),
-        titleSmall: GoogleFonts.publicSans(
+        titleSmall: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.onSurface,
         ),
-        bodyLarge: GoogleFonts.publicSans(
+        bodyLarge: GoogleFonts.poppins(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.onSurface,
         ),
-        bodyMedium: GoogleFonts.publicSans(
+        bodyMedium: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.onSurface,
         ),
-        bodySmall: GoogleFonts.publicSans(
+        bodySmall: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: AppColors.onSurfaceVariant,
         ),
-        labelLarge: GoogleFonts.publicSans(
+        labelLarge: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: AppColors.onSurface,
         ),
-        labelMedium: GoogleFonts.publicSans(
+        labelMedium: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.onSurface,
         ),
-        labelSmall: GoogleFonts.publicSans(
+        labelSmall: GoogleFonts.poppins(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: AppColors.onSurfaceVariant,
@@ -109,7 +109,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: GoogleFonts.manrope(
+          textStyle: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -129,7 +129,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: GoogleFonts.publicSans(
+          textStyle: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -151,11 +151,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: AppColors.primary, width: 2),
         ),
-        floatingLabelStyle: GoogleFonts.publicSans(
+        floatingLabelStyle: GoogleFonts.poppins(
           color: AppColors.primary,
           fontWeight: FontWeight.w500,
         ),
-        labelStyle: GoogleFonts.publicSans(
+        labelStyle: GoogleFonts.poppins(
           color: AppColors.onSurfaceVariant,
         ),
       ),
@@ -172,7 +172,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.manrope(
+        titleTextStyle: GoogleFonts.poppins(
           fontSize: 22,
           fontWeight: FontWeight.w700,
           color: AppColors.onSurface,
@@ -185,11 +185,11 @@ class AppTheme {
         unselectedItemColor: AppColors.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        selectedLabelStyle: GoogleFonts.publicSans(
+        selectedLabelStyle: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: GoogleFonts.publicSans(
+        unselectedLabelStyle: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
@@ -204,7 +204,7 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.tertiaryFixed,
-        labelStyle: GoogleFonts.publicSans(
+        labelStyle: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

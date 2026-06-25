@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmly/core/theme/app_colors.dart';
 import 'package:farmly/core/localization/app_localizations.dart';
 import 'package:farmly/core/providers.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -128,8 +129,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     setState(() => _isLoading = false);
 
     if (result['success'] == true) {
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(scanHistoryApiProvider);
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } else {
       final msgKey = locale.languageCode == 'mr'
@@ -145,6 +148,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         c.clear();
       }
       _otpFocusNodes[0].requestFocus();
+    }
+  }
+
+  Future<void> _googleLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      debugPrint('[GoogleLogin] Starting authenticate()...');
+      final GoogleSignInAccount? account = await GoogleSignIn.instance.authenticate();
+      
+      if (account == null) {
+        // User canceled
+        debugPrint('[GoogleLogin] User canceled sign-in');
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      debugPrint('[GoogleLogin] Signed in as: ${account.email}');
+      final email = account.email;
+      final name = account.displayName ?? 'Farmer';
+
+      final authService = ref.read(authServiceProvider);
+      final result = await authService.googleLogin(email, name: name);
+
+      if (!mounted) return;
+
+      setState(() => _isLoading = false);
+
+      if (result['success'] == true) {
+        debugPrint('[GoogleLogin] Backend login successful');
+        ref.invalidate(userProfileProvider);
+        ref.invalidate(scanHistoryApiProvider);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      } else {
+        debugPrint('[GoogleLogin] Backend returned error: ${result['message']}');
+        setState(() {
+          _errorMessage = result['message'] ?? 'Google Login failed';
+        });
+      }
+    } catch (e, stack) {
+      debugPrint('[GoogleLogin] Error: $e');
+      debugPrint('[GoogleLogin] Stack: $stack');
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Google Sign In Error: ${e.toString().length > 80 ? e.toString().substring(0, 80) : e}';
+      });
     }
   }
 
@@ -461,57 +514,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       ],
                     ),
                   ).animate().fadeIn(duration: 500.ms, delay: 300.ms).slideY(begin: 0.1),
-                  const SizedBox(height: 20),
-                  // Guest login
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/home');
-                    },
-                    icon: const Icon(Icons.person_outline),
-                    label: Text(l10n.translate('guest_login')),
-                  ).animate().fadeIn(duration: 400.ms, delay: 600.ms),
-                  const SizedBox(height: 32),
-                  // Start scanning CTA
+                  const SizedBox(height: 24),
+                  
+                  // OR Divider
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: AppColors.outlineVariant)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(color: AppColors.onSurfaceVariant, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: AppColors.outlineVariant)),
+                    ],
+                  ).animate().fadeIn(duration: 400.ms, delay: 500.ms),
+                  const SizedBox(height: 24),
+
+                  // Continue with Google Button
                   Container(
                     width: double.infinity,
                     height: 56,
                     decoration: BoxDecoration(
-                      gradient: AppColors.heroGradient,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.outlineVariant),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: AppColors.onSurface.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                      ),
+                    child: InkWell(
+                      onTap: _isLoading ? null : _googleLogin,
+                      borderRadius: BorderRadius.circular(16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.camera_alt, color: Colors.white),
+                          Icon(Icons.g_mobiledata, size: 36, color: Colors.blue),
                           const SizedBox(width: 8),
                           Text(
-                            l10n.translate('start_scanning'),
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                            'Continue with Google',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.onSurface,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  )
-                      .animate(onPlay: (c) => c.repeat(reverse: true))
-                      .shimmer(duration: 2.seconds, delay: 1.seconds)
-                      .animate()
-                      .fadeIn(duration: 500.ms, delay: 700.ms)
-                      .slideY(begin: 0.3),
+                  ).animate().fadeIn(duration: 500.ms, delay: 600.ms).slideY(begin: 0.2),
+
+
+
                   const SizedBox(height: 40),
                 ],
               ),

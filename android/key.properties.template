@@ -1,0 +1,16 @@
+# ─── Farmly Production Keystore Configuration ─────────────────────────────────
+# ⚠️ NEVER commit this file to Git! It is listed in .gitignore.
+# Fill these values after generating your keystore (see instructions below).
+#
+# HOW TO GENERATE YOUR KEYSTORE:
+# Run this command in your terminal:
+#
+#   keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias farmly-upload
+#
+# Save the generated upload-keystore.jks file in the android/ directory.
+# Then fill in the values below:
+
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=farmly-upload
+storeFile=../android/upload-keystore.jks

@@ -3,6 +3,7 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
+    # SQLite for local dev, PostgreSQL for production (set DATABASE_URL in .env or docker-compose)
     database_url: str = "sqlite:///./farmly.db"
     secret_key: str = "farmly-super-secret-key-change-in-production-2026"
     algorithm: str = "HS256"
@@ -17,7 +18,11 @@ class Settings(BaseSettings):
 
     # OpenRouter AI config
     openrouter_api_key: str = ""
-    ai_model: str = "google/gemini-2.0-flash-001"
+    openrouter_fallback_api_key: str = ""
+    ai_model: str = "google/gemini-2.5-flash"
+
+    # Native Google Gemini API key
+    gemini_api_key: str = ""
 
     class Config:
         env_file = ".env"

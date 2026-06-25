@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google Sign-In: Web client ID used by google_sign_in_android as fallback
+         when google-services.json is not present -->
+    <string name="default_web_client_id">988428256412-vqatag4is8gkocsvceneqtkdsennlsbt.apps.googleusercontent.com</string>
+</resources>

@@ -6,6 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:farmly/core/theme/app_colors.dart';
 import 'package:farmly/core/localization/app_localizations.dart';
 import 'package:farmly/core/providers.dart';
+import 'package:farmly/features/history/screens/scan_detail_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -98,55 +99,70 @@ class ProfileScreen extends ConsumerWidget {
                   children: scans.take(3).map((scan) {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceContainerLowest,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryContainer.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(10),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ScanDetailScreen(
+                                scan: scan is Map<String, dynamic> ? scan : Map<String, dynamic>.from(scan),
+                              ),
                             ),
-                            child: const Icon(Icons.bookmark, color: AppColors.primary, size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  isMarathi
-                                      ? (scan['detected_disease_mr'] ?? scan['detected_disease'] ?? 'Unknown')
-                                      : (scan['detected_disease'] ?? 'Unknown'),
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                Text(
-                                  '${scan['crop_type'] ?? ''} • ${scan['severity'] ?? 'Medium'}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
+                                child: const Icon(Icons.bookmark, color: AppColors.primary, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isMarathi
+                                          ? (scan['detected_disease_mr'] ?? scan['detected_disease'] ?? 'Unknown')
+                                          : (scan['detected_disease'] ?? 'Unknown'),
+                                      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      '${scan['crop_type'] ?? ''} • ${scan['severity'] ?? 'Medium'}',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${((scan['confidence'] as double?) != null ? ((scan['confidence'] as double) * 100).toInt() : 0)}%',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '${((scan['confidence'] as double?) != null ? ((scan['confidence'] as double) * 100).toInt() : 0)}%',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -165,8 +181,13 @@ class ProfileScreen extends ConsumerWidget {
                 onPressed: () async {
                   final authService = ref.read(authServiceProvider);
                   await authService.logout();
+                  
+                  // Clear cached data so the next user doesn't see it
+                  ref.invalidate(userProfileProvider);
+                  ref.invalidate(scanHistoryApiProvider);
+                  
                   if (context.mounted) {
-                    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                   }
                 },
                 icon: const Icon(Icons.logout, color: AppColors.error),
@@ -241,6 +262,16 @@ class ProfileScreen extends ConsumerWidget {
                 Icon(Icons.phone_outlined, size: 16, color: AppColors.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Text('+91 ${profile['mobile_number']}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
+              ],
+            ),
+          ] else if (profile['email'] != null && (profile['email'] as String).isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.email_outlined, size: 16, color: AppColors.onSurfaceVariant),
+                const SizedBox(width: 4),
+                Text('${profile['email']}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant)),
               ],
             ),
           ],
@@ -790,12 +821,23 @@ class _ScanHistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ScanDetailScreen(scan: scan),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
         children: [
           Container(
             width: 52,
@@ -839,8 +881,10 @@ class _ScanHistoryCard extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: delay)).slideX(begin: 0.1);
-  }
+    ),
+  ),
+).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: delay)).slideX(begin: 0.1);
+}
 }
 
 class _ApiScanHistoryCard extends StatelessWidget {
@@ -872,12 +916,25 @@ class _ApiScanHistoryCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ScanDetailScreen(
+                scan: scan is Map<String, dynamic> ? scan : Map<String, dynamic>.from(scan),
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
         children: [
           Container(
             width: 52,
@@ -937,6 +994,8 @@ class _ApiScanHistoryCard extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: delay)).slideX(begin: 0.1);
-  }
+    ),
+  ),
+).animate().fadeIn(duration: 400.ms, delay: Duration(milliseconds: delay)).slideX(begin: 0.1);
+}
 }

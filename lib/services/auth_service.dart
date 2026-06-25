@@ -90,6 +90,43 @@ class AuthService {
     }
   }
 
+  /// Mock Google Login using email.
+  Future<Map<String, dynamic>> googleLogin(String email, {String name = ''}) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/auth/google'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'name': name}),
+          )
+          .timeout(Duration(seconds: ApiConfig.timeoutSeconds));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['token'] != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_tokenKey, data['token']);
+          await prefs.setString(_phoneKey, email); // store email as phone key for now
+        }
+        return data;
+      } else {
+        return {
+          'success': false,
+          'message': 'Google Login failed. Please try again.',
+          'message_mr': 'Google लॉगिन अयशस्वी. पुन्हा प्रयत्न करा.',
+          'message_hi': 'Google लॉगिन विफल। पुनः प्रयास करें।',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Connection error. Check your internet.',
+        'message_mr': 'कनेक्शन त्रुटी. इंटरनेट तपासा.',
+        'message_hi': 'कनेक्शन त्रुटि। इंटरनेट जांचें।',
+      };
+    }
+  }
+
   /// Check if user is logged in (has a stored token).
   Future<bool> isLoggedIn() async {
     try {
